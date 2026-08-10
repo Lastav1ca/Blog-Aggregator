@@ -1,1 +1,1 @@
-RSS feed aggregator in TypeScript with Postgres integration
+RSS feed aggregator in TypeScript with PostgreSQL integration
