@@ -1,5 +1,7 @@
-import { setUser } from "./config.js";
-import { createUser, getUserByName } from "./lib/db/queries/users.js";
+import { readConfig, setUser } from "./config.js";
+import { createFeed } from "./lib/db/queries/feeds.js";
+import { createUser, deleteUsers, getAllUsers, getUserByName } from "./lib/db/queries/users.js";
+import { fetchFeed } from "./rss.js";
 
 type CommandHandler = (cmdName: string, ...args: string[]) => Promise<void>;
 
@@ -38,6 +40,66 @@ export async function handlerRegister(cmdName : string, ...args: string[]){
     console.log(`User created successfully.`)
     const user = await getUserByName(args[0]);
     console.log(`Debug: `, user);
+}
+
+export async function handlerReset(cmdName : string, ...args: string[]){
+    const result = await deleteUsers();
+    console.log('Table reset successfully.')
+}
+
+export async function handlerUsers(cmdName : string, ...args: string[]){
+
+    const result = await getAllUsers();
+
+    if (!result){
+        console.log("Table is empty");
+        return
+    }
+
+    const currentUser = readConfig().currentUserName;
+
+
+    for (const user of result){
+        if (currentUser == user.name){
+            console.log(`* ${user.name} (current)`)
+        }else{
+            console.log(`* ${user.name}`)
+        }
+        
+    }
+}
+
+export async function handlerAgg(cmdName: string, ...args: string[]){
+
+    const result = await fetchFeed("https://www.wagslane.dev/index.xml");
+
+    if (!result){
+        throw new Error("Error fetching website");
+        process.exit(1);
+    }
+
+    console.log(result);
+}
+
+export async function handlerAddFeed(cmdName: string, ...args: string[]){
+
+    if (args.length != 2){
+        throw new Error("Invalid command usage. Use: add <feed_name> <url>")
+        process.exit(1);
+    }
+
+    const currentUserName = readConfig().currentUserName;
+    const currentUser = await getUserByName(currentUserName);
+
+    const result = await createFeed(args[0], args[1], currentUser.id);
+
+    if (!result){
+        throw new Error("Invalid request");
+        process.exit(1);
+    }
+
+    console.log(`Feed ${args[0]} created.`)
+
 }
 
 export function registerCommand(registry : CommandsRegistry, cmdName : string, handler: CommandHandler){
