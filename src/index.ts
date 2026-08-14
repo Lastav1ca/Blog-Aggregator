@@ -1,5 +1,5 @@
 import { setUser, readConfig } from "./config.js";
-import { CommandsRegistry, handlerLogin, handlerRegister, registerCommand, runCommand, handlerReset, handlerUsers, handlerAgg, handlerAddFeed } from "./commands.js"
+import { CommandsRegistry, handlerLogin, handlerRegister, registerCommand, runCommand, handlerReset, handlerUsers, handlerAgg, handlerAddFeed, handlerFeeds } from "./commands.js"
 
 async function main() {
     const registry : CommandsRegistry = {};
@@ -10,6 +10,7 @@ async function main() {
     registerCommand(registry, "users", handlerUsers);
     registerCommand(registry, "agg", handlerAgg);
     registerCommand(registry, "addfeed", handlerAddFeed);
+    registerCommand(registry, "feeds", handlerFeeds);
 
     const args = process.argv.slice(2);
 

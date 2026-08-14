@@ -1,6 +1,6 @@
 import { readConfig, setUser } from "./config.js";
-import { createFeed } from "./lib/db/queries/feeds.js";
-import { createUser, deleteUsers, getAllUsers, getUserByName } from "./lib/db/queries/users.js";
+import { createFeed, getAllFeeds } from "./lib/db/queries/feeds.js";
+import { createUser, deleteUsers, getAllUsers, getUserById, getUserByName } from "./lib/db/queries/users.js";
 import { fetchFeed } from "./rss.js";
 
 type CommandHandler = (cmdName: string, ...args: string[]) => Promise<void>;
@@ -100,6 +100,23 @@ export async function handlerAddFeed(cmdName: string, ...args: string[]){
 
     console.log(`Feed ${args[0]} created.`)
 
+}
+
+export async function handlerFeeds(cmdName: string, ...args: string[]){
+    const feeds = await getAllFeeds();
+
+    if (!feeds){
+        console.log(`There are no feeds`)
+        return
+    }
+
+    for (const feed of feeds){
+        console.log(feed.name);
+        console.log(feed.url);
+
+        const user = await getUserById(feed.user_id)
+        console.log(user.name);
+    }
 }
 
 export function registerCommand(registry : CommandsRegistry, cmdName : string, handler: CommandHandler){
