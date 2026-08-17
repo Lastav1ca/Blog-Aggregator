@@ -22,5 +22,3 @@ export async function getFeedByURL(feedUrl : string){
     return result;
 }
 
-
-

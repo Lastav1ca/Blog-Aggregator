@@ -1,5 +1,5 @@
 import { readConfig, setUser } from "./config.js";
-import { createFeedFollow, getFeedFollowsForUser } from "./lib/db/queries/feedFollows.js";
+import { createFeedFollow, deleteFeedFollow, getFeedFollowsForUser } from "./lib/db/queries/feedFollows.js";
 import { createFeed, getAllFeeds, getFeedByURL } from "./lib/db/queries/feeds.js";
 import { createUser, deleteUsers, getAllUsers, getUserById, getUserByName } from "./lib/db/queries/users.js";
 import { fetchFeed } from "./rss.js";
@@ -7,6 +7,7 @@ import { fetchFeed } from "./rss.js";
 type CommandHandler = (cmdName: string, ...args: string[]) => Promise<void>;
 
 export type CommandsRegistry = Record<string, CommandHandler>;
+
 
 export async function handlerLogin(cmdName : string, ...args: string[]) {
     if (args.length == 0){
@@ -168,6 +169,20 @@ export async function handlerFollowing(cmdName : string, ...args : string[]){
     for (const feed of feedsFollowing){
         console.log(feed.feedName);
     }
+}
+
+export async function handlerUnfollow(cmdName : string, ...args : string[]){
+
+    if (!args[0] || !args[1]){
+        throw new Error("Wrong command usage. Use unfollow <user> <feed_url>")
+    }
+
+    const user = await getUserByName(args[0]);
+    const userId = user.id;
+
+    const unfollow = await deleteFeedFollow(userId, args[1])
+
+    console.log("Feed unfollowed successfully.")
 }
 
 export function registerCommand(registry : CommandsRegistry, cmdName : string, handler: CommandHandler){
